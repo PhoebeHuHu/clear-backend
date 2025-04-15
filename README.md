@@ -8,174 +8,144 @@ The backend is deployed on Render and can be accessed at:
 https://clear-edi-backend.onrender.com/
 ```
 
-API documentation is available at:
+API Documentation:
 
-- Swagger UI: https://clear-edi-backend.onrender.com/docs
+- Swagger UI (Recommended): https://clear-edi-backend.onrender.com/docs
 - ReDoc: https://clear-edi-backend.onrender.com/redoc
 
-## Getting Started
+## Local Development Guide
 
-### Prerequisites
+### Requirements
 
-- Python 3.8+
+- Python 3.8 or higher
 - MongoDB (for local development)
 
-### Installation
+### Quick Start
 
-1. Clone the repository:
+1. Get the code:
 
-```bash
-git clone https://github.com/PhoebeHuHu/clear-backend
-cd clear-backend
-```
-
-2. Create and activate a virtual environment:
-
-```bash
-python -m venv .venv
-# On Windows
-.venv\Scripts\activate
-# On macOS/Linux
-source .venv/bin/activate
-```
-
-3. Install development dependencies:
-
-```bash
-pip install -r requirements-dev.txt
-```
-
-For production environments, use:
-
-```bash
-pip install -r requirements.txt
-```
-
-4. Set up environment variables:
-
-   - Copy `.env.example` to `.env`:
-     ```bash
-     cp .env.example .env
-     ```
-
-5. Set up pre-commit hooks:
-
-```bash
-pre-commit install
-```
-
-This will automatically run tests and linting checks before each commit.
-
-### Development Workflow
-
-#### Managing Dependencies
-
-The project uses `pip-tools` for dependency management:
-
-- `requirements.in`: Contains direct production dependencies
-- `requirements-dev.in`: Contains development dependencies
-- `requirements.txt` and `requirements-dev.txt`: Generated files with pinned versions
-
-To add new dependencies:
-
-1. Add them to the appropriate `.in` file
-2. Compile new requirements:
    ```bash
-   pip-compile requirements.in
-   pip-compile requirements-dev.in
-   ```
-3. Install updated dependencies:
-   ```bash
-   pip-sync requirements-dev.txt
+   # Option 1: Clone the repository
+   git clone https://github.com/PhoebeHuHu/clear-backend
+   # OR
+   # Option 2: Extract the downloaded zip file
+
+   # Enter project directory
+   cd clear-backend
    ```
 
-#### Code Quality
+2. Create and activate virtual environment:
 
-The project uses several tools to maintain code quality:
+   ```bash
+   # Create virtual environment
+   python -m venv .venv
 
-- **Ruff**: For linting and formatting
-- **pre-commit**: Runs checks before each commit
-- **pytest**: For testing
+   # Activate virtual environment
+   # Windows:
+   .venv\Scripts\activate
+   # macOS/Linux:
+   source .venv/bin/activate
+   ```
 
-These checks run automatically on commit, but you can also run them manually:
+3. Install dependencies:
 
-```bash
-# Format and lint code
-ruff check .
-ruff format .
+   ```bash
+   # Install all development dependencies
+   pip install -r requirements-dev.txt
+   ```
 
-# Run tests
-pytest
+4. Configure environment variables:
+
+   ```bash
+   # Copy environment variables example file
+   cp .env.example .env
+
+   # Edit .env file and set necessary variables:
+   # - MONGODB_URL: MongoDB connection string
+   # - Other required configurations...
+   ```
+
+5. Start the server:
+   ```bash
+   # Start development server (with hot reload)
+   uvicorn app.main:app --reload --port 8000
+   ```
+
+After starting the server, you can access:
+
+- API Documentation: http://localhost:8000/docs
+- API Service: http://localhost:8000
+
+## Project Structure
+
+```
+clear-backend/
+├── app/                    # Main application directory
+│   ├── api/
+│   │   └── v1/           # API routes and endpoints
+│   ├── models/           # Data models definition
+│   ├── services/        # Business logic layer
+│   ├── db/             # Database related code
+│   ├── utils/          # Utility functions
+│   ├── constants/      # Constants definition
+│   ├── config.py       # Application configuration
+│   └── main.py         # Application entry point
+├── requirements.txt     # Production dependencies
+└── requirements-dev.txt # Development dependencies
 ```
 
-### Running Locally
+### Core Files Description
 
-1. Make sure your MongoDB instance is running
+- `app/main.py`: Application entry point containing FastAPI app instance and basic configuration
+- `app/api/`: Contains all API endpoint definitions and route handlers
+- `app/models/`: Defines data models and database schemas
+- `app/services/`: Contains core business logic implementation
+- `app/db/`: Database connection and operation related code
+- `requirements.txt`: Dependencies required for production
+- `.env`: Environment variables configuration file (needs to be created)
 
-2. Start the FastAPI server:
+## Common Issues
 
-```bash
-uvicorn app.main:app --reload --port 8000
-```
+If you encounter startup issues, please check:
 
-The API will be available at `http://localhost:8000`
+1. MongoDB is running properly
+2. Environment variables are correctly configured
+3. All dependencies are properly installed
 
-### Project Structure
+## API Documentation Guide
 
-```
-app/
-├── api/                    # API endpoints
-│   └── v1/                # API version 1
-├── constants/             # Constants and enums
-├── db/                    # Database related code
-├── models/                # Database models
-├── schemas/               # Pydantic schemas for request/response
-├── services/              # Business logic
-├── tests/                 # Test files
-└── utils/                 # Utility functions
-```
+When developing locally, you can view the API documentation at:
 
-Key files:
+- Swagger UI (Recommended): http://localhost:8000/docs
+  - Provides interactive API testing interface
+  - Test APIs directly in the browser
+- ReDoc: http://localhost:8000/redoc
+  - Provides clearer documentation reading experience
+  - Includes detailed request/response examples
 
-- `main.py`: Application entry point and FastAPI app configuration
-- `config.py`: Application configuration
-- `requirements.in`: Direct production dependencies
-- `requirements-dev.in`: Development dependencies
-- `requirements.txt`: Generated production dependencies with versions
-- `requirements-dev.txt`: Generated development dependencies with versions
-- `.env`: Environment variables (not in version control)
-- `.env.example`: Example environment variables
-- `.pre-commit-config.yaml`: Pre-commit hook configuration
-- `pytest.ini`: Pytest configuration
+## Running Tests
 
-### Running Tests
-
-Run the test suite:
+To run the test suite:
 
 ```bash
 # Run all tests
-pytest
+python -m pytest
 
-# Run with verbose output
-pytest -v
-
-# Run a specific test file
-pytest app/tests/test_specific_file.py
+# Run tests with verbose output
+python -m pytest -v
 
 # Run tests with coverage report
-pytest --cov=app
+python -m pytest --cov=app
+
+# Run a specific test file
+python -m pytest app/tests/your_test_file.py
+
+# Run tests matching specific pattern
+python -m pytest -k "test_pattern"
 ```
 
-### API Documentation
+Test files are located in the `app/tests/` directory. Each module has its corresponding test file.
 
-Once the server is running, you can access the API documentation at:
+### Test Configuration
 
-- Swagger UI (Interactive): http://localhost:8000/docs
-- ReDoc (Alternative): http://localhost:8000/redoc
-
-The documentation provides:
-
-- Detailed API endpoints information
-- Request/response schemas
-- Interactive testing interface
-- Example requests and responses
+The test configuration is defined in `pytest.ini` and uses a separate test database to avoid affecting your development database.

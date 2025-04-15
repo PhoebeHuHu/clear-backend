@@ -9,7 +9,7 @@ from app.constants.error_messages import EErrorMessage
 from app.db.cargo_repository import CargoRepository
 from app.db.edi_repository import EDIRepository
 from app.models.responses import EDIDecodeResponse, ProcessingError
-from app.services.cargo_edi.edi_decode import EDIDecodingService
+from app.services.edi_decode import EDIDecodingService
 
 router = APIRouter(tags=["EDI"])
 

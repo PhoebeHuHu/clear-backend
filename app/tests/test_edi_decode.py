@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from app.constants.error_messages import EErrorMessage
 from app.db.cargo_repository import CargoRepository
 from app.db.edi_repository import EDIRepository
-from app.services.cargo_edi.edi_decode import EDIDecodingService
+from app.services.edi_decode import EDIDecodingService
 
 # Test data
 VALID_EDI_MESSAGE = """LIN+1+I'

@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.constants.error_messages import EErrorMessage
 from app.models.responses import EDIGenerateResponse
-from app.services.cargo_edi.edi_generate import EDIGenerationService
+from app.services.edi_generate import EDIGenerationService
 
 router = APIRouter(tags=["EDI"])
 

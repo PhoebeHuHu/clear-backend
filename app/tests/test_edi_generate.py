@@ -3,7 +3,7 @@ import pytest
 from app.constants.cargo import ECargoType
 from app.constants.error_messages import EErrorMessage
 from app.models.cargo_item import CargoItem
-from app.services.cargo_edi.edi_generate import EDIGenerationService
+from app.services.edi_generate import EDIGenerationService
 from app.utils.cargo_edi import escape_quotes, generate_edi_segment
 
 # Test Data
