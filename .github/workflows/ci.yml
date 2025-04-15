@@ -39,5 +39,5 @@ jobs:
         run: |
           python -m pytest -v
         env:
-          MONGODB_URL: mongodb://localhost:27017
-          MONGODB_DB_NAME: cargo_test
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DB_NAME: ${{ secrets.MONGODB_DB_NAME }}
