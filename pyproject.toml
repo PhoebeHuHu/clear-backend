@@ -1,0 +1,27 @@
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "F",      # Pyflakes
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "N",      # pep8-naming
+    "B",      # flake8-bugbear
+    "C",      # flake8-comprehensions
+    "I",      # isort
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]    # Allow unused imports in __init__.py
+"tests/*" = ["ANN"]         # Ignore missing annotations in tests
+"app/tests/*" = ["ANN"]     # Ignore missing annotations in tests
+
+[tool.ruff.lint.pep8-naming]
+# Enforce Enum classes to start with 'E' and other classes to follow PascalCase
+ignore-names = ["^(([A-Z][a-z0-9]+)+|E[A-Z][a-zA-Z0-9]*)$"]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+suppress-none-returning = true 
