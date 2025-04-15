@@ -1,4 +1,5 @@
 """EDI parsing utilities."""
+
 from typing import Optional
 
 from app.constants.cargo import ECargoType
@@ -9,31 +10,45 @@ from app.utils.cargo_edi.edi_generator import unescape_quotes
 
 def parse_segment(segment: str) -> tuple[str, list[str]]:
     """Parse a segment into its ID and data elements."""
-    parts = segment.split('+')
-    if len(parts) < 2 or (parts[0] not in ['LIN', 'PCI'] and parts[0] not in [e.value for e in EEDISegmentType]):
+    parts = segment.split("+")
+    if len(parts) < 2:
         raise ValueError(EErrorMessage.INVALID_SEGMENT_TYPE.format(parts[0]))
-    return parts[0], [e.rstrip("'") for e in parts[1:]]
+
+    segment_id = parts[0]
+    if segment_id not in ["LIN", "PCI"] and segment_id not in [e.value for e in EEDISegmentType]:
+        raise ValueError(EErrorMessage.INVALID_SEGMENT_TYPE.format(segment_id))
+
+    return segment_id, [unescape_quotes(e.rstrip("'")) for e in parts[1:]]
 
 
 def parse_pac_segment(elements: list[str]) -> dict[str, Optional[str | int]]:
     """Parse PAC segment data."""
     result = {}
-    if len(elements) >= 3 and elements[2]:
-        cargo_type = elements[2].split(':')[0]
-        if cargo_type in [e.value for e in ECargoType]:
-            result['cargo_type'] = cargo_type
-        else:
-            raise ValueError(EErrorMessage.INVALID_CARGO_TYPE_FORMAT.format(cargo_type))
 
-    if elements:
+    # Handle cargo type (in the third element if present)
+    if len(elements) >= 3:
+        # The third element might contain empty values (represented by consecutive +)
+        # So we need to check all elements
+        for element in elements[2:]:
+            if element and ":" in element:
+                cargo_type = element.split(":")[0]
+                if cargo_type in [e.value for e in ECargoType]:
+                    result["cargo_type"] = cargo_type
+                    break
+                else:
+                    raise ValueError(EErrorMessage.INVALID_CARGO_TYPE_FORMAT.format(cargo_type))
+
+    # Handle package count (in the first element)
+    if elements and elements[0]:
         try:
             package_count = int(elements[0])
             if package_count > 0:
-                result['number_of_packages'] = package_count
+                result["number_of_packages"] = package_count
             else:
                 raise ValueError(EErrorMessage.INVALID_PACKAGE_COUNT)
         except ValueError as err:
             raise ValueError(EErrorMessage.INVALID_NUMBER_FORMAT.format(elements[0])) from err
+
     return result
 
 
@@ -42,12 +57,12 @@ def parse_rff_segment(elements: list[str]) -> dict[str, str]:
     if not elements:
         raise ValueError(EErrorMessage.INVALID_REFERENCE_FORMAT.format(""))
 
-    parts = elements[0].split(':')
+    parts = elements[0].split(":")
     if len(parts) != 2:
         raise ValueError(EErrorMessage.INVALID_REFERENCE_FORMAT.format(elements[0]))
 
     ref_type, value = parts
-    mapping = {'AAQ': 'container_number', 'MB': 'master_bill_of_lading_number', 'BH': 'house_bill_of_lading_number'}
+    mapping = {"AAQ": "container_number", "MB": "master_bill_of_lading_number", "BH": "house_bill_of_lading_number"}
 
     if ref_type not in mapping or not value:
         raise ValueError(EErrorMessage.INVALID_REFERENCE_FORMAT.format(elements[0]))

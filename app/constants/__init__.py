@@ -4,8 +4,8 @@ from .error_messages import EErrorMessage
 from .validation import VALID_ASCII_PATTERN
 
 __all__ = [
-    'ECargoType',
-    'EEDISegmentType',
-    'EErrorMessage',
-    'VALID_ASCII_PATTERN',
+    "ECargoType",
+    "EEDISegmentType",
+    "EErrorMessage",
+    "VALID_ASCII_PATTERN",
 ]

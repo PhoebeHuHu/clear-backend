@@ -12,12 +12,12 @@ from app.utils.cargo_edi.edi_parser import (
 from app.utils.cargo_edi.message_processor import parse_edi_message
 
 __all__ = [
-    'escape_quotes',
-    'unescape_quotes',
-    'generate_edi_segment',
-    'parse_segment',
-    'parse_pac_segment',
-    'parse_rff_segment',
-    'process_edi_content',
-    'parse_edi_message',
+    "escape_quotes",
+    "unescape_quotes",
+    "generate_edi_segment",
+    "parse_segment",
+    "parse_pac_segment",
+    "parse_rff_segment",
+    "process_edi_content",
+    "parse_edi_message",
 ]

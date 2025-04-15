@@ -1,4 +1,5 @@
 """Repository for cargo items collection operations."""
+
 from app.constants.error_messages import EErrorMessage
 from app.db.database import get_database
 from app.models.cargo_item import CargoItem
@@ -15,7 +16,6 @@ class CargoRepository:
 
         for item in cargo_items:
             try:
-
                 doc = item.model_dump(exclude_unset=True, exclude_none=True)
                 result = await db.cargo_items.insert_one(doc)
                 if not result.acknowledged:

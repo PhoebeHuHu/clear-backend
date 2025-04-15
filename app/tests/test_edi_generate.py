@@ -12,7 +12,7 @@ VALID_CARGO_ITEM = {
     "number_of_packages": 10,
     "container_number": "CONT123456",
     "master_bill_of_lading_number": "MBL123456",
-    "house_bill_of_lading_number": "HBL123456"
+    "house_bill_of_lading_number": "HBL123456",
 }
 
 VALID_CARGO_ITEMS = [
@@ -22,26 +22,23 @@ VALID_CARGO_ITEMS = [
         "number_of_packages": 5,
         "container_number": "CONT789012",
         "master_bill_of_lading_number": "MBL789012",
-        "house_bill_of_lading_number": "HBL789012"
-    }
+        "house_bill_of_lading_number": "HBL789012",
+    },
 ]
 
 INVALID_CARGO_ITEM = {
     "cargo_type": "INVALID",
     "number_of_packages": -1,
     "container_number": "CONT123€",  # Non-ASCII character
-    "master_bill_of_lading_number": "MBL123"
+    "master_bill_of_lading_number": "MBL123",
 }
 
 MIXED_CARGO_ITEMS = [
     VALID_CARGO_ITEM,
     INVALID_CARGO_ITEM,
-    {
-        "cargo_type": "FCX",
-        "number_of_packages": 3,
-        "container_number": "CONT456789"
-    }
+    {"cargo_type": "FCX", "number_of_packages": 3, "container_number": "CONT456789"},
 ]
+
 
 # Unit Tests
 def test_escape_quotes() -> None:
@@ -51,25 +48,21 @@ def test_escape_quotes() -> None:
     assert escape_quotes("ABC???'123") == "ABC?'123"
     assert escape_quotes("ABC'123'456") == "ABC?'123?'456"
 
+
 @pytest.mark.parametrize("cargo_type", ["FCL", "LCL", "FCX"])
 def test_valid_cargo_types(cargo_type: str) -> None:
     """Test validation of valid cargo types."""
     item = CargoItem(
-        cargo_type=cargo_type,
-        number_of_packages=1,
-        container_number="CONT123",
-        master_bill_of_lading_number="MBL123"
+        cargo_type=cargo_type, number_of_packages=1, container_number="CONT123", master_bill_of_lading_number="MBL123"
     )
     assert isinstance(item.cargo_type, ECargoType)
+
 
 def test_invalid_cargo_type():
     """Test validation of invalid cargo type."""
     with pytest.raises(ValueError):
-        CargoItem(
-            cargo_type="INVALID",
-            number_of_packages=1,
-            container_number="TEST123"
-        )
+        CargoItem(cargo_type="INVALID", number_of_packages=1, container_number="TEST123")
+
 
 @pytest.mark.parametrize("packages", [-1, 0])
 def test_invalid_package_count(packages: int) -> None:
@@ -79,8 +72,9 @@ def test_invalid_package_count(packages: int) -> None:
             cargo_type="FCL",
             number_of_packages=packages,
             container_number="CONT123",
-            master_bill_of_lading_number="MBL123"
+            master_bill_of_lading_number="MBL123",
         )
+
 
 @pytest.mark.asyncio
 async def test_generate_edi_segment_valid():
@@ -90,7 +84,7 @@ async def test_generate_edi_segment_valid():
         number_of_packages=10,
         container_number="CONT123",
         master_bill_of_lading_number="MBL123",
-        house_bill_of_lading_number="HBL123"
+        house_bill_of_lading_number="HBL123",
     )
 
     result = generate_edi_segment(cargo_item, 1)
@@ -103,10 +97,11 @@ async def test_generate_edi_segment_valid():
         "PCI+1'",
         "RFF+MB:MBL123'",
         "PCI+1'",
-        "RFF+BH:HBL123'"
+        "RFF+BH:HBL123'",
     ]
     for segment in expected_segments:
         assert segment in result
+
 
 @pytest.mark.asyncio
 async def test_generate_edi_segment_with_quotes():
@@ -116,7 +111,7 @@ async def test_generate_edi_segment_with_quotes():
         number_of_packages=5,
         container_number="CONT'123",
         master_bill_of_lading_number="MBL'123",
-        house_bill_of_lading_number="HBL'123"
+        house_bill_of_lading_number="HBL'123",
     )
 
     result = generate_edi_segment(cargo_item, 2)
@@ -129,42 +124,30 @@ async def test_generate_edi_segment_with_quotes():
         "PCI+1'",
         "RFF+MB:MBL?'123'",
         "PCI+1'",
-        "RFF+BH:HBL?'123'"
+        "RFF+BH:HBL?'123'",
     ]
     for segment in expected_segments:
         assert segment in result
+
 
 @pytest.mark.asyncio
 async def test_generate_edi_segment_empty_values():
     """Test generating EDI segment with empty values."""
-    cargo_item = CargoItem(
-        cargo_type=ECargoType.FCX,
-        number_of_packages=1
-    )
+    cargo_item = CargoItem(cargo_type=ECargoType.FCX, number_of_packages=1)
 
     result = generate_edi_segment(cargo_item)
-    expected_segments = [
-        "LIN+1+I'",
-        "PAC+++FCX:67:95'",
-        "PAC+1+1'"
-    ]
+    expected_segments = ["LIN+1+I'", "PAC+++FCX:67:95'", "PAC+1+1'"]
     for segment in expected_segments:
         assert segment in result
+
 
 @pytest.mark.asyncio
 async def test_generate_edi_segment_optional_fields():
     """Test EDI segment generation with optional fields omitted."""
-    cargo_item = CargoItem(
-        cargo_type=ECargoType.FCL,
-        number_of_packages=10
-    )
+    cargo_item = CargoItem(cargo_type=ECargoType.FCL, number_of_packages=10)
 
     result = generate_edi_segment(cargo_item, 1)
-    expected_segments = [
-        "LIN+1+I'",
-        "PAC+++FCL:67:95'",
-        "PAC+10+1'"
-    ]
+    expected_segments = ["LIN+1+I'", "PAC+++FCL:67:95'", "PAC+10+1'"]
     for segment in expected_segments:
         assert segment in result
 
@@ -172,29 +155,27 @@ async def test_generate_edi_segment_optional_fields():
     assert "RFF+MB:" not in result
     assert "RFF+BH:" not in result
 
+
 @pytest.mark.asyncio
 async def test_special_characters_handling() -> None:
     """Test handling of special characters in EDI values."""
     cargo_item = CargoItem(
-        cargo_type="FCL",
-        number_of_packages=10,
-        container_number="CONT'123",
-        master_bill_of_lading_number="MBL'456"
+        cargo_type="FCL", number_of_packages=10, container_number="CONT'123", master_bill_of_lading_number="MBL'456"
     )
 
     edi_segment = generate_edi_segment(cargo_item)
     assert "CONT?'123" in edi_segment
     assert "MBL?'456" in edi_segment
 
+
 # Integration Tests
+
 
 # 1. Single Valid Item Tests
 @pytest.mark.asyncio
 async def test_generate_edi_single_valid_item(client):
     """Test EDI generation API with a single valid cargo item."""
-    response = await client.post("/api/v1/edi/generate", json={
-        "items": [VALID_CARGO_ITEM]
-    })
+    response = await client.post("/api/v1/edi/generate", json={"items": [VALID_CARGO_ITEM]})
 
     assert response.status_code == 200
     data = response.json()
@@ -213,18 +194,17 @@ async def test_generate_edi_single_valid_item(client):
         "PCI+1'",
         "RFF+MB:MBL123456'",
         "PCI+1'",
-        "RFF+BH:HBL123456'"
+        "RFF+BH:HBL123456'",
     ]
     for segment in expected_segments:
         assert segment in edi_content
+
 
 # 2. Single Invalid Item Tests
 @pytest.mark.asyncio
 async def test_generate_edi_single_invalid_item(client):
     """Test EDI generation API with a single invalid cargo item."""
-    response = await client.post("/api/v1/edi/generate", json={
-        "items": [INVALID_CARGO_ITEM]
-    })
+    response = await client.post("/api/v1/edi/generate", json={"items": [INVALID_CARGO_ITEM]})
 
     assert response.status_code == 422  # Changed from 400 to 422 for validation errors
     data = response.json()
@@ -232,13 +212,12 @@ async def test_generate_edi_single_invalid_item(client):
     assert len(data["detail"]) > 0
     assert any("cargo_type" in error["message"].lower() for error in data["detail"])
 
+
 # 3. Multiple Valid Items Tests
 @pytest.mark.asyncio
 async def test_generate_edi_multiple_valid_items(client):
     """Test EDI generation API with multiple valid cargo items."""
-    response = await client.post("/api/v1/edi/generate", json={
-        "items": VALID_CARGO_ITEMS
-    })
+    response = await client.post("/api/v1/edi/generate", json={"items": VALID_CARGO_ITEMS})
 
     assert response.status_code == 200
     data = response.json()
@@ -251,13 +230,12 @@ async def test_generate_edi_multiple_valid_items(client):
     assert "CONT123456" in edi_content
     assert "CONT789012" in edi_content
 
+
 # 4. Mixed Valid and Invalid Items Tests
 @pytest.mark.asyncio
 async def test_generate_edi_mixed_items(client):
     """Test EDI generation API with a mix of valid and invalid cargo items."""
-    response = await client.post("/api/v1/edi/generate", json={
-        "items": MIXED_CARGO_ITEMS
-    })
+    response = await client.post("/api/v1/edi/generate", json={"items": MIXED_CARGO_ITEMS})
 
     assert response.status_code == 200
     data = response.json()
@@ -274,17 +252,17 @@ async def test_generate_edi_mixed_items(client):
     assert "CONT123456" in edi_content  # From valid item
     assert "CONT123€" not in edi_content  # From invalid item
 
+
 # 5. Empty Request Tests
 @pytest.mark.asyncio
 async def test_generate_edi_empty_request(client):
     """Test EDI generation API with an empty request."""
-    response = await client.post("/api/v1/edi/generate", json={
-        "items": []
-    })
+    response = await client.post("/api/v1/edi/generate", json={"items": []})
 
     assert response.status_code == 400
     data = response.json()
     assert data["detail"] == EErrorMessage.NO_ITEMS.value
+
 
 # 6. ASCII Character Validation Tests
 @pytest.mark.asyncio
@@ -294,12 +272,10 @@ async def test_ascii_character_validation_single_item(client):
         "cargo_type": "FCL",
         "number_of_packages": 1,
         "container_number": "CONT123€",  # Non-ASCII character
-        "master_bill_of_lading_number": "MBL123"
+        "master_bill_of_lading_number": "MBL123",
     }
 
-    response = await client.post("/api/v1/edi/generate", json={
-        "items": [item_with_non_ascii]
-    })
+    response = await client.post("/api/v1/edi/generate", json={"items": [item_with_non_ascii]})
 
     # Should return 422 as there are no valid items
     assert response.status_code == 422
@@ -308,6 +284,7 @@ async def test_ascii_character_validation_single_item(client):
     assert len(data["detail"]) > 0
     assert "ascii" in data["detail"][0]["message"].lower()  # Case insensitive check
 
+
 @pytest.mark.asyncio
 async def test_ascii_character_validation_mixed_items(client):
     """Test validation of ASCII characters with mixed valid and invalid items."""
@@ -315,19 +292,17 @@ async def test_ascii_character_validation_mixed_items(client):
         "cargo_type": "FCL",
         "number_of_packages": 1,
         "container_number": "CONT123€",  # Non-ASCII character
-        "master_bill_of_lading_number": "MBL123"
+        "master_bill_of_lading_number": "MBL123",
     }
 
     valid_item = {
         "cargo_type": "FCL",
         "number_of_packages": 1,
         "container_number": "CONT456",
-        "master_bill_of_lading_number": "MBL456"
+        "master_bill_of_lading_number": "MBL456",
     }
 
-    response = await client.post("/api/v1/edi/generate", json={
-        "items": [item_with_non_ascii, valid_item]
-    })
+    response = await client.post("/api/v1/edi/generate", json={"items": [item_with_non_ascii, valid_item]})
 
     assert response.status_code == 200
     data = response.json()
@@ -336,6 +311,7 @@ async def test_ascii_character_validation_mixed_items(client):
     assert len(data["errors"]) == 1
     assert "ascii" in data["errors"][0]["message"].lower()  # Case insensitive check
 
+
 # 7. Optional Fields Tests
 @pytest.mark.asyncio
 async def test_generate_edi_optional_fields(client):
@@ -343,12 +319,10 @@ async def test_generate_edi_optional_fields(client):
     item_with_optional_fields = {
         "cargo_type": "FCL",
         "number_of_packages": 5,
-        "container_number": "CONT123"  # Only one reference number
+        "container_number": "CONT123",  # Only one reference number
     }
 
-    response = await client.post("/api/v1/edi/generate", json={
-        "items": [item_with_optional_fields]
-    })
+    response = await client.post("/api/v1/edi/generate", json={"items": [item_with_optional_fields]})
 
     assert response.status_code == 200
     data = response.json()
@@ -362,6 +336,7 @@ async def test_generate_edi_optional_fields(client):
     assert "RFF+MB:" not in edi_content  # Should not include master bill
     assert "RFF+BH:" not in edi_content  # Should not include house bill
 
+
 # 8. Service Layer Tests
 @pytest.mark.asyncio
 async def test_generate_edi_message() -> None:
@@ -371,14 +346,14 @@ async def test_generate_edi_message() -> None:
             cargo_type=ECargoType.FCL,
             number_of_packages=10,
             container_number="CONT123",
-            master_bill_of_lading_number="MBL123"
+            master_bill_of_lading_number="MBL123",
         ),
         CargoItem(
             cargo_type=ECargoType.LCL,
             number_of_packages=5,
             container_number="CONT456",
-            house_bill_of_lading_number="HBL456"
-        )
+            house_bill_of_lading_number="HBL456",
+        ),
     ]
 
     service = EDIGenerationService()
@@ -395,6 +370,7 @@ async def test_generate_edi_message() -> None:
     assert "PAC+++LCL:67:95'" in edi_content
     assert "RFF+AAQ:CONT123" in edi_content
     assert "RFF+AAQ:CONT456" in edi_content
+
 
 @pytest.mark.asyncio
 async def test_generate_edi_message_empty_items() -> None:

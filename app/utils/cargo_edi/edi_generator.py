@@ -34,7 +34,7 @@ def escape_quotes(value: Optional[str]) -> str:
     final = ""
     i = 0
     while i < len(result):
-        if result[i] == "'" and (i == 0 or result[i-1] != "?"):
+        if result[i] == "'" and (i == 0 or result[i - 1] != "?"):
             final += "?'"
         else:
             final += result[i]

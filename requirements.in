@@ -1,0 +1,8 @@
+# Production dependencies
+fastapi
+pydantic
+motor
+pymongo
+python-dotenv
+uvicorn
+pydantic-settings 

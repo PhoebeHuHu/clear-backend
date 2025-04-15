@@ -1,4 +1,5 @@
 """EDI API routes."""
+
 from fastapi import APIRouter
 
 from app.api.v1.edi.edi_decode_controller import router as decode_router

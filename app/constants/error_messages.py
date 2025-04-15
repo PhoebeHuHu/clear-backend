@@ -1,9 +1,11 @@
 """Error message constants."""
+
 from enum import Enum
 
 
 class EErrorMessage(str, Enum):
     """Error messages for EDI generation and validation."""
+
     NO_ITEMS = "No valid items found in the request"
     INVALID_CARGO_TYPE = "Invalid cargo type"
     INVALID_PACKAGE_COUNT = "Number of packages must be greater than 0"

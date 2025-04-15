@@ -1,4 +1,5 @@
 """EDI message processing utilities."""
+
 from typing import Any, Optional
 
 from app.constants.error_messages import EErrorMessage
@@ -13,11 +14,11 @@ def process_segment(segment: str, cargo_data: dict[str, Any]) -> list[str]:
     try:
         segment_id, elements = parse_segment(segment)
 
-        if segment_id == 'PAC':
+        if segment_id == "PAC":
             segment_data = parse_pac_segment(elements)
             if segment_data:
                 cargo_data.update(segment_data)
-        elif segment_id == 'RFF':
+        elif segment_id == "RFF":
             segment_data = parse_rff_segment(elements)
             if segment_data:
                 cargo_data.update(segment_data)
@@ -31,16 +32,15 @@ def process_segment(segment: str, cargo_data: dict[str, Any]) -> list[str]:
 def validate_cargo_data(cargo_data: dict[str, Any]) -> list[str]:
     """Validate required fields in cargo data."""
     errors = []
-    if 'cargo_type' not in cargo_data:
+    if "cargo_type" not in cargo_data:
         errors.append(EErrorMessage.MISSING_REQUIRED_FIELD.format("cargo_type"))
-    if 'number_of_packages' not in cargo_data:
+    if "number_of_packages" not in cargo_data:
         errors.append(EErrorMessage.MISSING_REQUIRED_FIELD.format("number_of_packages"))
     return errors
 
 
 def parse_message_group(
-    message_group: list[str],
-    group_idx: int
+    message_group: list[str], group_idx: int
 ) -> tuple[Optional[CargoItem], Optional[ProcessingError]]:
     """Parse a single message group into a cargo item."""
     cargo_data: dict[str, Any] = {}
@@ -56,7 +56,7 @@ def parse_message_group(
         group_errors.extend(validate_cargo_data(cargo_data))
 
     # Return results
-    if not group_errors and 'cargo_type' in cargo_data and 'number_of_packages' in cargo_data:
+    if not group_errors and "cargo_type" in cargo_data and "number_of_packages" in cargo_data:
         try:
             cargo_item = CargoItem(**cargo_data)
             return cargo_item, None
@@ -64,10 +64,7 @@ def parse_message_group(
             return None, ProcessingError(index=group_idx, message=str(e))
 
     if group_errors:
-        return None, ProcessingError(
-            index=group_idx,
-            message="\n".join(group_errors)
-        )
+        return None, ProcessingError(index=group_idx, message="\n".join(group_errors))
 
     return None, None
 

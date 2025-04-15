@@ -9,4 +9,4 @@ api_router = APIRouter()
 
 api_router.include_router(edi_router)
 
-__all__ = ['api_router']
+__all__ = ["api_router"]

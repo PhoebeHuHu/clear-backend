@@ -1,4 +1,5 @@
 """Tests for EDI decoding functionality."""
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -62,13 +63,12 @@ RFF+MB:JKL012'"""
 
 EMPTY_EDI_MESSAGE = ""
 
+
 @pytest.fixture
 def edi_service() -> EDIDecodingService:
     """Fixture for EDI decoding service."""
-    return EDIDecodingService(
-        cargo_repository=CargoRepository(),
-        edi_repository=EDIRepository()
-    )
+    return EDIDecodingService(cargo_repository=CargoRepository(), edi_repository=EDIRepository())
+
 
 @pytest.mark.asyncio
 async def test_decode_valid_single_message(edi_service: EDIDecodingService) -> None:
@@ -84,6 +84,7 @@ async def test_decode_valid_single_message(edi_service: EDIDecodingService) -> N
     assert cargo.container_number == "ABC123"
     assert cargo.master_bill_of_lading_number == "DEF456"
     assert cargo.house_bill_of_lading_number == "GHI789"
+
 
 @pytest.mark.asyncio
 async def test_decode_valid_multiple_messages(edi_service: EDIDecodingService) -> None:
@@ -108,6 +109,7 @@ async def test_decode_valid_multiple_messages(edi_service: EDIDecodingService) -
     assert cargo2.container_number == "BETA123"
     assert cargo2.master_bill_of_lading_number == "GAMMA345"
     assert cargo2.house_bill_of_lading_number is None
+
 
 @pytest.mark.asyncio
 async def test_decode_mixed_valid_invalid_messages(edi_service: EDIDecodingService) -> None:
@@ -143,13 +145,11 @@ async def test_decode_mixed_valid_invalid_messages(edi_service: EDIDecodingServi
     assert any(EErrorMessage.INVALID_NUMBER_FORMAT.format("NOT_A_NUMBER") in error.message for error in errors)
     assert any(EErrorMessage.INVALID_REFERENCE_FORMAT.format("INVALID:XYZ") in error.message for error in errors)
 
+
 @pytest.mark.asyncio
 async def test_decode_mixed_message_endpoint(client: TestClient) -> None:
     """Test the decode endpoint with a mixed valid/invalid message."""
-    response = await client.post(
-        "/api/v1/edi/decode",
-        json={"edi_content": MIXED_EDI_MESSAGE}
-    )
+    response = await client.post("/api/v1/edi/decode", json={"edi_content": MIXED_EDI_MESSAGE})
 
     assert response.status_code == 200
     data = response.json()
@@ -183,6 +183,7 @@ async def test_decode_mixed_message_endpoint(client: TestClient) -> None:
     assert any(EErrorMessage.INVALID_NUMBER_FORMAT.format("NOT_A_NUMBER") in msg for msg in error_messages)
     assert any(EErrorMessage.INVALID_REFERENCE_FORMAT.format("INVALID:XYZ") in msg for msg in error_messages)
 
+
 @pytest.mark.asyncio
 async def test_decode_invalid_message(edi_service):
     """Test decoding an invalid EDI message."""
@@ -195,6 +196,7 @@ async def test_decode_invalid_message(edi_service):
     assert any(EErrorMessage.INVALID_SEGMENT_TYPE.format("INVALID_SEGMENT") in msg for msg in error_messages)
     assert any(EErrorMessage.INVALID_NUMBER_FORMAT.format("INVALID") in msg for msg in error_messages)
 
+
 @pytest.mark.asyncio
 async def test_decode_empty_message(edi_service):
     """Test decoding an empty EDI message."""
@@ -203,6 +205,7 @@ async def test_decode_empty_message(edi_service):
     assert len(cargo_items) == 0
     assert len(errors) == 1
     assert errors[0].message == EErrorMessage.NO_ITEMS
+
 
 @pytest.mark.asyncio
 async def test_decode_message_with_special_characters(edi_service):
@@ -217,6 +220,7 @@ RFF+AAQ:ABC?'123'"""  # Note the escaped quote
     assert len(cargo_items) == 1
     assert not errors
     assert cargo_items[0].container_number == "ABC'123"  # Quote should be unescaped
+
 
 @pytest.mark.asyncio
 async def test_decode_partial_message(edi_service):
@@ -234,38 +238,32 @@ RFF+AAQ:ABC123'"""  # Missing bill of lading numbers
     assert cargo_items[0].master_bill_of_lading_number is None
     assert cargo_items[0].house_bill_of_lading_number is None
 
+
 # API endpoint tests
 @pytest.mark.asyncio
 async def test_decode_endpoint_valid_request(client):
     """Test the decode endpoint with a valid request."""
-    response = await client.post(
-        "/api/v1/edi/decode",
-        json={"edi_content": VALID_EDI_MESSAGE}
-    )
+    response = await client.post("/api/v1/edi/decode", json={"edi_content": VALID_EDI_MESSAGE})
 
     assert response.status_code == 200
     data = response.json()
     assert len(data["cargo_items"]) == 1
     assert data["errors"] is None
 
+
 @pytest.mark.asyncio
 async def test_decode_endpoint_empty_request(client):
     """Test the decode endpoint with an empty request."""
-    response = await client.post(
-        "/api/v1/edi/decode",
-        json={"edi_content": ""}
-    )
+    response = await client.post("/api/v1/edi/decode", json={"edi_content": ""})
 
     assert response.status_code == 400
     assert response.json()["detail"] == EErrorMessage.NO_ITEMS
 
+
 @pytest.mark.asyncio
 async def test_decode_endpoint_invalid_request(client):
     """Test the decode endpoint with an invalid request."""
-    response = await client.post(
-        "/api/v1/edi/decode",
-        json={"edi_content": INVALID_EDI_MESSAGE}
-    )
+    response = await client.post("/api/v1/edi/decode", json={"edi_content": INVALID_EDI_MESSAGE})
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     data = response.json()

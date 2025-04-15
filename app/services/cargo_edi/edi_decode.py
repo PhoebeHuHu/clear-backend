@@ -35,8 +35,9 @@ class EDIDecodingService:
         # Validate ASCII characters first
         validation_errors = validate_ascii_characters(edi_content)
         if validation_errors:
-            return [], [ProcessingError(message=error["error"], index=error.get("index"))
-                       for error in validation_errors]
+            return [], [
+                ProcessingError(message=error["error"], index=error.get("index")) for error in validation_errors
+            ]
 
         try:
             cargo_items, errors = parse_edi_message(edi_content)
@@ -54,13 +55,13 @@ class EDIDecodingService:
                     try:
                         await self.edi_repository.store_edi_message(edi_content, cargo_ids)
                     except Exception as e:
-                        errors.append(ProcessingError(
-                            message=EErrorMessage.FAILED_TO_STORE.value.format("EDI message", str(e))
-                        ))
+                        errors.append(
+                            ProcessingError(message=EErrorMessage.FAILED_TO_STORE.value.format("EDI message", str(e)))
+                        )
                 except Exception as e:
-                    errors.append(ProcessingError(
-                        message=EErrorMessage.FAILED_TO_STORE.value.format("cargo items", str(e))
-                    ))
+                    errors.append(
+                        ProcessingError(message=EErrorMessage.FAILED_TO_STORE.value.format("cargo items", str(e)))
+                    )
 
             # Convert any errors to ProcessingError format if they're not already
             formatted_errors = []
@@ -68,10 +69,7 @@ class EDIDecodingService:
                 if isinstance(error, ProcessingError):
                     formatted_errors.append(error)
                 else:
-                    formatted_errors.append(ProcessingError(
-                        message=error["error"],
-                        index=error.get("index")
-                    ))
+                    formatted_errors.append(ProcessingError(message=error["error"], index=error.get("index")))
 
             return cargo_items, formatted_errors
 

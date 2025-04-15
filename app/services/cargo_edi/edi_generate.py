@@ -8,6 +8,7 @@ from app.db.edi_repository import EDIRepository
 from app.models.cargo_item import CargoItem
 from app.models.responses import ProcessingError
 from app.utils.cargo_edi import generate_edi_segment
+from app.utils.validation import validate_ascii_characters
 
 
 class EDIGenerationService:
@@ -18,22 +19,24 @@ class EDIGenerationService:
         self.edi_repository = EDIRepository()
 
     def _validate_cargo_item(
-        self,
-        cargo_item: Union[dict[str, Any], CargoItem],
-        index: int
+        self, cargo_item: Union[dict[str, Any], CargoItem], index: int
     ) -> tuple[Optional[CargoItem], list[ProcessingError]]:
         """Validate a cargo item and convert it to CargoItem if needed."""
         try:
+            # First validate cargo type through Pydantic model
             if isinstance(cargo_item, dict):
                 cargo_item = CargoItem(**cargo_item)
+
+            # Then validate ASCII characters
+            ascii_errors = validate_ascii_characters(cargo_item.dict())
+            if ascii_errors:
+                return None, [ProcessingError(index=index, message=error.message) for error in ascii_errors]
+
             return cargo_item, []
         except ValidationError as e:
             return None, [ProcessingError(index=index, message=str(e))]
 
-    async def _store_cargo_items(
-        self,
-        valid_items: list[CargoItem]
-    ) -> tuple[list[str], list[ProcessingError]]:
+    async def _store_cargo_items(self, valid_items: list[CargoItem]) -> tuple[list[str], list[ProcessingError]]:
         """Store cargo items in database and return their IDs."""
         errors = []
         cargo_item_ids = []
@@ -43,15 +46,10 @@ class EDIGenerationService:
             for item, item_id in zip(valid_items, cargo_item_ids):
                 item.id = item_id
         except Exception as e:
-            errors.append(ProcessingError(
-                message=EErrorMessage.FAILED_TO_STORE.value.format("cargo items", str(e))
-            ))
+            errors.append(ProcessingError(message=EErrorMessage.FAILED_TO_STORE.value.format("cargo items", str(e))))
         return cargo_item_ids, errors
 
-    def _generate_edi_segments(
-        self,
-        valid_items: list[CargoItem]
-    ) -> tuple[list[str], list[ProcessingError]]:
+    def _generate_edi_segments(self, valid_items: list[CargoItem]) -> tuple[list[str], list[ProcessingError]]:
         """Generate EDI segments for valid items."""
         errors = []
         segments = []
@@ -60,36 +58,29 @@ class EDIGenerationService:
                 segment = generate_edi_segment(item, index)
                 segments.append(segment)
             except Exception as e:
-                errors.append(ProcessingError(
-                    index=index-1,
-                    message=EErrorMessage.FAILED_TO_GENERATE_SEGMENT.value.format(index, str(e))
-                ))
+                errors.append(
+                    ProcessingError(
+                        index=index - 1, message=EErrorMessage.FAILED_TO_GENERATE_SEGMENT.value.format(index, str(e))
+                    )
+                )
         return segments, errors
 
-    async def _store_edi_message(
-        self,
-        edi_content: str,
-        cargo_ids: list[str]
-    ) -> list[ProcessingError]:
+    async def _store_edi_message(self, edi_content: str, cargo_ids: list[str]) -> list[ProcessingError]:
         """Store EDI message in database."""
         errors = []
         try:
             if cargo_ids and not await self.edi_repository.store_edi_message(edi_content, cargo_ids):
-                errors.append(ProcessingError(
-                    message=EErrorMessage.FAILED_TO_STORE.value.format(
-                        "EDI message",
-                        "storage operation failed"
+                errors.append(
+                    ProcessingError(
+                        message=EErrorMessage.FAILED_TO_STORE.value.format("EDI message", "storage operation failed")
                     )
-                ))
+                )
         except Exception as e:
-            errors.append(ProcessingError(
-                message=EErrorMessage.FAILED_TO_STORE.value.format("EDI message", str(e))
-            ))
+            errors.append(ProcessingError(message=EErrorMessage.FAILED_TO_STORE.value.format("EDI message", str(e))))
         return errors
 
     async def generate_edi_message(
-        self,
-        items: list[Union[dict[str, Any], CargoItem]]
+        self, items: list[Union[dict[str, Any], CargoItem]]
     ) -> tuple[Optional[str], list[ProcessingError]]:
         """Generate EDI message from cargo items and store in database."""
         errors = []
@@ -124,10 +115,7 @@ class EDIGenerationService:
         edi_content = "".join(segments)
 
         # Store EDI document
-        storage_errors = await self._store_edi_message(
-            edi_content,
-            [str(item.id) for item in valid_items if item.id]
-        )
+        storage_errors = await self._store_edi_message(edi_content, [str(item.id) for item in valid_items if item.id])
         errors.extend(storage_errors)
 
         return edi_content, errors

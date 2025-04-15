@@ -4,6 +4,7 @@ Models and type definitions for cargo items.
 This module contains all cargo-related data structures, including models,
 type definitions, and validation types.
 """
+
 from datetime import UTC, datetime
 from typing import Optional
 
@@ -14,6 +15,7 @@ from app.constants import ECargoType
 
 class CargoItem(BaseModel):
     """Cargo item model."""
+
     id: Optional[str] = None
     cargo_type: ECargoType
     number_of_packages: int = Field(gt=0)

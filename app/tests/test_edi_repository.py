@@ -1,4 +1,5 @@
 """Tests for EDI repository storage functionality."""
+
 from datetime import datetime
 
 import pytest
@@ -13,21 +14,25 @@ PAC+++LCL:67:95'
 PAC+9+1'
 RFF+AAQ:ABC123'"""
 
+
 @pytest.fixture
 def edi_repository():
     """Fixture for EDI repository."""
     return EDIRepository()
+
 
 @pytest.fixture
 def sample_cargo_ids():
     """Fixture for sample cargo IDs."""
     return [str(ObjectId()) for _ in range(2)]
 
+
 @pytest.mark.asyncio
 async def test_store_edi_message_success(edi_repository, sample_cargo_ids):
     """Test successful storage of EDI message."""
     result = await EDIRepository.store_edi_message(SAMPLE_EDI_CONTENT, sample_cargo_ids)
     assert result is True
+
 
 @pytest.mark.asyncio
 async def test_store_edi_message_empty_content(edi_repository, sample_cargo_ids):
@@ -36,11 +41,13 @@ async def test_store_edi_message_empty_content(edi_repository, sample_cargo_ids)
         await EDIRepository.store_edi_message("", sample_cargo_ids)
     assert str(exc_info.value) == EErrorMessage.EMPTY_EDI_CONTENT.value
 
+
 @pytest.mark.asyncio
 async def test_store_edi_message_empty_cargo_ids(edi_repository):
     """Test storing EDI message with empty cargo IDs list."""
     result = await EDIRepository.store_edi_message(SAMPLE_EDI_CONTENT, [])
     assert result is True  # Should still store even with empty cargo IDs
+
 
 @pytest.mark.asyncio
 async def test_store_edi_message_verify_content(edi_repository, sample_cargo_ids):

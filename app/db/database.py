@@ -8,17 +8,17 @@ from pymongo.server_api import ServerApi
 from app.config import settings
 
 # Create a new client and connect to the server
-client = AsyncIOMotorClient(settings.MONGODB_URI, server_api=ServerApi('1'))
+client = AsyncIOMotorClient(settings.MONGODB_URI, server_api=ServerApi("1"))
 
 # Get the database
-_is_test = 'pytest' in sys.modules
+_is_test = "pytest" in sys.modules
 db = client[settings.MONGODB_DB_NAME + "_test" if _is_test else settings.MONGODB_DB_NAME]
 
 
 async def connect_to_mongo() -> None:
     """Connect to MongoDB."""
     try:
-        await client.admin.command('ping')
+        await client.admin.command("ping")
         print("✅ MongoDB connection successful!")
     except ConnectionFailure as e:
         print("❌ MongoDB connection failed!")

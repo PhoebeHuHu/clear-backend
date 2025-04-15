@@ -23,11 +23,7 @@ class EDIRepository:
         if not edi_content:
             raise ValueError(EErrorMessage.EMPTY_EDI_CONTENT.value)
 
-        edi_doc = EDIMessage(
-            edi_content=edi_content,
-            cargo_item_ids=cargo_item_ids,
-            created_at=datetime.now(UTC)
-        )
+        edi_doc = EDIMessage(edi_content=edi_content, cargo_item_ids=cargo_item_ids, created_at=datetime.now(UTC))
 
         db = get_database()
         result = await db.edi_messages.insert_one(edi_doc.model_dump())

@@ -1,4 +1,5 @@
 """EDI generation controller."""
+
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
@@ -13,12 +14,10 @@ router = APIRouter(tags=["EDI"])
 
 class GenerateEDIRequest(BaseModel):
     """Request model for EDI generation."""
+
     items: list[dict[str, Any]]
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        arbitrary_types_allowed=True
-    )
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
 
 @router.post("/generate")
@@ -26,10 +25,7 @@ async def generate_edi_handler(request: GenerateEDIRequest) -> EDIGenerateRespon
     """Generate EDI messages from a list of cargo items."""
     # Check for empty request
     if not request.items:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=EErrorMessage.NO_ITEMS.value
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=EErrorMessage.NO_ITEMS.value)
 
     # Use EDI generation service
     service = EDIGenerationService()
@@ -44,13 +40,7 @@ async def generate_edi_handler(request: GenerateEDIRequest) -> EDIGenerateRespon
 
     # If we have no content but have errors, all items were invalid
     if errors:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=error_dicts
-        )
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=error_dicts)
 
     # Should never reach here, but just in case
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="Failed to generate EDI message"
-    )
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to generate EDI message")

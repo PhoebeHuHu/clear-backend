@@ -1,0 +1,16 @@
+# Development dependencies
+-r requirements.in
+
+# Testing
+pytest
+pytest-asyncio
+httpx
+anyio
+trio
+
+# Linting and formatting
+ruff
+pre-commit
+
+# Development tools
+pip-tools 

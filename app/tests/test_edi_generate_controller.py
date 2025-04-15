@@ -1,4 +1,5 @@
 """Tests for EDI generation controller."""
+
 import pytest
 from fastapi import status
 from httpx import AsyncClient
@@ -27,10 +28,7 @@ async def test_generate_edi_success(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_generate_edi_partial_success(client: AsyncClient):
     """Test EDI generation with some invalid items."""
-    invalid_items = [
-        {"cargo_type": "INVALID", "number_of_packages": 1},
-        *SAMPLE_CARGO_ITEMS
-    ]
+    invalid_items = [{"cargo_type": "INVALID", "number_of_packages": 1}, *SAMPLE_CARGO_ITEMS]
     response = await client.post("/api/v1/edi/generate", json={"items": invalid_items})
     assert response.status_code == status.HTTP_200_OK
     assert "edi_content" in response.json()
@@ -44,7 +42,7 @@ async def test_generate_edi_all_invalid(client: AsyncClient):
     """Test EDI generation with all invalid items."""
     invalid_items = [
         {"cargo_type": "INVALID1", "number_of_packages": 1},
-        {"cargo_type": "INVALID2", "number_of_packages": 2}
+        {"cargo_type": "INVALID2", "number_of_packages": 2},
     ]
     response = await client.post("/api/v1/edi/generate", json={"items": invalid_items})
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

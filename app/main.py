@@ -21,11 +21,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    lifespan=lifespan
-)
+app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json", lifespan=lifespan)
 
 # Set CORS middleware
 app.add_middleware(
@@ -45,18 +41,10 @@ async def health_check() -> dict[str, str]:
     """Check application health including database connection."""
     try:
         db = get_database()
-        result = await db.command('ping')
-        return {
-            "status": "healthy",
-            "database": "connected",
-            "ping": str(result)
-        }
+        result = await db.command("ping")
+        return {"status": "healthy", "database": "connected", "ping": str(result)}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "status": "unhealthy",
-                "database": "disconnected",
-                "error": str(e)
-            }
+            detail={"status": "unhealthy", "database": "disconnected", "error": str(e)},
         ) from e

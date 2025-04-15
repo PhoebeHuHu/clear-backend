@@ -1,4 +1,5 @@
 """EDI decoding controller."""
+
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
@@ -15,6 +16,7 @@ router = APIRouter(tags=["EDI"])
 
 class DecodeEDIRequest(BaseModel):
     """Request model for EDI decoding."""
+
     edi_content: str
 
 
@@ -28,10 +30,7 @@ async def decode_edi_handler(request: DecodeEDIRequest) -> EDIDecodeResponse:
     """Decode EDI message into cargo items and store in database."""
     # Check for empty content
     if not request.edi_content:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=EErrorMessage.NO_ITEMS
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=EErrorMessage.NO_ITEMS)
 
     # Initialize services
     cargo_repository = CargoRepository()
@@ -50,13 +49,7 @@ async def decode_edi_handler(request: DecodeEDIRequest) -> EDIDecodeResponse:
 
     # If we have no items but have errors, all segments were invalid
     if errors:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=error_dicts
-        )
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=error_dicts)
 
     # Should never reach here, but just in case
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="Failed to decode EDI message"
-    )
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to decode EDI message")

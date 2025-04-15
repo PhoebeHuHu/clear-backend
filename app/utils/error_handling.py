@@ -1,4 +1,5 @@
 """Error handling utilities for the application."""
+
 from typing import Any, Optional, Union
 
 from fastapi import HTTPException
@@ -24,7 +25,7 @@ def create_error_response(
     error: Optional[str] = None,
     item: Optional[Union[CargoItem, dict]] = None,
     index: Optional[int] = None,
-    validation_errors: Optional[list[ProcessingError]] = None
+    validation_errors: Optional[list[ProcessingError]] = None,
 ) -> dict[str, Any]:
     """
     Create a standardized error response.
@@ -39,7 +40,7 @@ def create_error_response(
         Standardized error response dictionary
     """
     if isinstance(item, CargoItem):
-        idx = getattr(item, 'index', None)
+        idx = getattr(item, "index", None)
         item_data = item
     else:
         idx = index
@@ -48,7 +49,7 @@ def create_error_response(
     response = {
         "index": idx if idx is not None else -1,
         "error": str(error or EErrorMessage.UNKNOWN_ERROR),
-        "item": item_data
+        "item": item_data,
     }
 
     if validation_errors:
@@ -69,8 +70,4 @@ def handle_validation_error(e: ValidationError, item: dict, index: int) -> dict[
     Returns:
         Error response dictionary
     """
-    return create_error_response(
-        error=str(e),
-        item=item,
-        index=index
-    )
+    return create_error_response(error=str(e), item=item, index=index)

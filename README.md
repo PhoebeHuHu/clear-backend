@@ -39,17 +39,74 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-3. Install dependencies:
+3. Install development dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+For production environments, use:
 
 ```bash
 pip install -r requirements.txt
 ```
 
 4. Set up environment variables:
+
    - Copy `.env.example` to `.env`:
      ```bash
      cp .env.example .env
      ```
+
+5. Set up pre-commit hooks:
+
+```bash
+pre-commit install
+```
+
+This will automatically run tests and linting checks before each commit.
+
+### Development Workflow
+
+#### Managing Dependencies
+
+The project uses `pip-tools` for dependency management:
+
+- `requirements.in`: Contains direct production dependencies
+- `requirements-dev.in`: Contains development dependencies
+- `requirements.txt` and `requirements-dev.txt`: Generated files with pinned versions
+
+To add new dependencies:
+
+1. Add them to the appropriate `.in` file
+2. Compile new requirements:
+   ```bash
+   pip-compile requirements.in
+   pip-compile requirements-dev.in
+   ```
+3. Install updated dependencies:
+   ```bash
+   pip-sync requirements-dev.txt
+   ```
+
+#### Code Quality
+
+The project uses several tools to maintain code quality:
+
+- **Ruff**: For linting and formatting
+- **pre-commit**: Runs checks before each commit
+- **pytest**: For testing
+
+These checks run automatically on commit, but you can also run them manually:
+
+```bash
+# Format and lint code
+ruff check .
+ruff format .
+
+# Run tests
+pytest
+```
 
 ### Running Locally
 
@@ -82,9 +139,13 @@ Key files:
 
 - `main.py`: Application entry point and FastAPI app configuration
 - `config.py`: Application configuration
-- `requirements.txt`: Project dependencies
+- `requirements.in`: Direct production dependencies
+- `requirements-dev.in`: Development dependencies
+- `requirements.txt`: Generated production dependencies with versions
+- `requirements-dev.txt`: Generated development dependencies with versions
 - `.env`: Environment variables (not in version control)
 - `.env.example`: Example environment variables
+- `.pre-commit-config.yaml`: Pre-commit hook configuration
 - `pytest.ini`: Pytest configuration
 
 ### Running Tests
@@ -92,24 +153,17 @@ Key files:
 Run the test suite:
 
 ```bash
-# On Windows
-python -m pytest
-# Or use pytest directly if it's in your PATH
+# Run all tests
 pytest
 
-# On macOS/Linux
-python -m pytest
-# Or use pytest directly if it's in your PATH
-pytest
+# Run with verbose output
+pytest -v
 
-# To run with verbose output
-python -m pytest -v
+# Run a specific test file
+pytest app/tests/test_specific_file.py
 
-# To run a specific test file
-python -m pytest app/tests/test_specific_file.py
-
-# To run tests with coverage report
-python -m pytest --cov=app
+# Run tests with coverage report
+pytest --cov=app
 ```
 
 ### API Documentation

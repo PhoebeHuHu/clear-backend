@@ -1,4 +1,5 @@
 """Tests for EDI generation repository storage functionality."""
+
 from datetime import datetime
 
 import pytest
@@ -16,14 +17,14 @@ SAMPLE_CARGO_ITEMS = [
         number_of_packages=10,
         container_number="CONT123456",
         master_bill_of_lading_number="MBL123456",
-        house_bill_of_lading_number="HBL123456"
+        house_bill_of_lading_number="HBL123456",
     ),
     CargoItem(
         cargo_type=ECargoType.LCL,
         number_of_packages=5,
         container_number="CONT789012",
-        master_bill_of_lading_number="MBL789012"
-    )
+        master_bill_of_lading_number="MBL789012",
+    ),
 ]
 
 SAMPLE_EDI_CONTENT = """LIN+1+I'
@@ -43,21 +44,25 @@ RFF+AAQ:CONT789012'
 PCI+1'
 RFF+MB:MBL789012'"""
 
+
 @pytest.fixture
 def edi_repository():
     """Fixture for EDI repository."""
     return EDIRepository()
+
 
 @pytest.fixture
 def sample_cargo_ids():
     """Fixture for sample cargo IDs."""
     return [str(ObjectId()) for _ in range(len(SAMPLE_CARGO_ITEMS))]
 
+
 @pytest.mark.asyncio
 async def test_store_generated_edi_success(edi_repository, sample_cargo_ids):
     """Test successful storage of generated EDI message."""
     result = await EDIRepository.store_edi_message(SAMPLE_EDI_CONTENT, sample_cargo_ids)
     assert result is True
+
 
 @pytest.mark.asyncio
 async def test_store_generated_edi_verify_content(edi_repository, sample_cargo_ids):
@@ -78,6 +83,7 @@ async def test_store_generated_edi_verify_content(edi_repository, sample_cargo_i
     assert "created_at" in stored_doc
     assert isinstance(stored_doc["created_at"], datetime)
 
+
 @pytest.mark.asyncio
 async def test_store_generated_edi_with_quotes(edi_repository, sample_cargo_ids):
     """Test storing EDI message with escaped quotes."""
@@ -94,6 +100,7 @@ RFF+AAQ:CONT?'123'"""
     stored_doc = await db.edi_messages.find_one({"edi_content": edi_content})
     assert stored_doc is not None
     assert stored_doc["edi_content"] == edi_content  # Quotes should remain escaped
+
 
 @pytest.mark.asyncio
 async def test_store_generated_edi_empty_cargo_ids(edi_repository):

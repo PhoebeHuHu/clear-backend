@@ -1,4 +1,5 @@
 """Validation utilities for the application."""
+
 import re
 from collections.abc import Sequence
 from typing import Any
@@ -8,8 +9,7 @@ from app.models.responses import ProcessingError
 
 
 def validate_ascii_characters(
-    data: dict[str, Any] | str | None,
-    fields: str | Sequence[str] | None = None
+    data: dict[str, Any] | str | None, fields: str | Sequence[str] | None = None
 ) -> list[ProcessingError]:
     """
     Validate that string(s) contain only ASCII characters.
@@ -30,16 +30,16 @@ def validate_ascii_characters(
             for field in field_list:
                 if field in data:
                     value = data.get(field)
-                    if value and not re.match(VALID_ASCII_PATTERN, value):
-                        errors.append(ProcessingError(
-                            message=f"{field} contains non-ASCII characters"
-                        ))
-    elif data:  # If data is a string (and not None)
+                    if isinstance(value, str) and not re.match(VALID_ASCII_PATTERN, value):
+                        errors.append(ProcessingError(message=f"{field} contains non-ASCII characters"))
+        else:  # If no fields specified, validate all string values
+            for field, value in data.items():
+                if isinstance(value, str) and not re.match(VALID_ASCII_PATTERN, value):
+                    errors.append(ProcessingError(message=f"{field} contains non-ASCII characters"))
+    elif isinstance(data, str):  # If data is a string (and not None)
         # If data is a single string, validate it directly
         field_name = fields if isinstance(fields, str) else "value"
         if not re.match(VALID_ASCII_PATTERN, data):
-            errors.append(ProcessingError(
-                message=f"{field_name} contains non-ASCII characters"
-            ))
+            errors.append(ProcessingError(message=f"{field_name} contains non-ASCII characters"))
 
     return errors
