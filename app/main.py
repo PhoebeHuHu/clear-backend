@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
@@ -41,19 +41,22 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health")
-async def test_db() -> dict[str, str]:
-    """Test database connection."""
+async def health_check() -> dict[str, str]:
+    """Check application health including database connection."""
     try:
         db = get_database()
         result = await db.command('ping')
         return {
-            "status": "success",
-            "message": "Successfully connected to MongoDB",
-            "ping": result
+            "status": "healthy",
+            "database": "connected",
+            "ping": str(result)
         }
     except Exception as e:
-        return {
-            "status": "error",
-            "message": "Failed to connect to MongoDB",
-            "error": str(e)
-        }
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "status": "unhealthy",
+                "database": "disconnected",
+                "error": str(e)
+            }
+        ) from e

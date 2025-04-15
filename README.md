@@ -1,17 +1,31 @@
 # Clear AI Backend
 
+## Production Deployment
+
+The backend is deployed on Render and can be accessed at:
+
+```
+https://clear-edi-backend.onrender.com/
+```
+
+API documentation is available at:
+
+- Swagger UI: https://clear-edi-backend.onrender.com/docs
+- ReDoc: https://clear-edi-backend.onrender.com/redoc
+
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.8+
+- MongoDB (for local development)
 
 ### Installation
 
 1. Clone the repository:
 
 ```bash
-git clone [your-repository-url]
+git clone https://github.com/PhoebeHuHu/clear-backend
 cd clear-backend
 ```
 
@@ -31,12 +45,23 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Set up the test database:
+4. Set up environment variables:
    - Copy `.env.example` to `.env`:
      ```bash
      cp .env.example .env
      ```
-   - The `.env` file already contains a test MongoDB connection string that you can use directly
+
+### Running Locally
+
+1. Make sure your MongoDB instance is running
+
+2. Start the FastAPI server:
+
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+The API will be available at `http://localhost:8000`
 
 ### Project Structure
 
@@ -85,14 +110,6 @@ python -m pytest app/tests/test_specific_file.py
 
 # To run tests with coverage report
 python -m pytest --cov=app
-```
-
-### Running the Application
-
-Start the FastAPI server:
-
-```bash
-uvicorn app.main:app --reload
 ```
 
 ### API Documentation
